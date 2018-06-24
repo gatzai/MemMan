@@ -1,2 +1,2 @@
 # MemMan
-memory mannager
+memory manager
