@@ -32,6 +32,7 @@ int my_init(){
     p->left = p->right = p;
     p->isused = false;
     p->size = MAXBUFFER;
+    p->offset = 0;
     mbl = p;
     return 0;
 }
@@ -55,6 +56,34 @@ int my_deinit(){
 }
 
 //申请空间
-char* my_init(size_t _n){
+char* my_new(size_t _n){
+    if(mbl == NULL)return NULL;
+    if(_n > MAXBUFFER)return "Not Enough Space!";
+    mblnode* p = mbl;
 
+    for(p=mbl; p->right != mbl;p = p->right){
+        if(p->isused || p->size<_n)continue;
+        else break;
+    }
+
+    if(p == NULL || p->size < _n)return NULL;
+
+    if(p->size > _n){
+        //新块
+        mblnode* newmbl = new mblnode;
+        newmbl->size = _n;
+        newmbl->isused = true;
+        newmbl->left = p->left;
+        newmbl->right = p;
+        newmbl->offset = p->offset;
+
+        //剩余块
+        p->size-=_n;
+        p->offset +=_n;
+        p->left = newmbl;
+    }
+    else if(p->size == _n){
+        p->isused = true;
+        //在这停顿！！！
+    }
 }
