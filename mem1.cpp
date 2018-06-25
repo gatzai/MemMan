@@ -1,4 +1,9 @@
+/*
+*字符内存管理
+*/
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
 #define MAXBUFFER 12
 #define MINBUFFER 2
 
@@ -13,12 +18,12 @@ struct mblnode{
 };
 
 mblnode* mbl = NULL;
-
 char BUFF[MAXBUFFER];
 
 int my_init();
 int my_deinit();
 char* my_new(size_t _n);
+int my_del(char* _p);
 int my_print();
 
 
@@ -28,14 +33,32 @@ int main(){
     my_print();
     while(true){
         if(k==0)break;
+
+        //先申请，显示，再释放
         cin >> k;
-        my_new(k);
+        char* p1 = my_new(k);
+        if(p1 != NULL){
+            for(int i=0; i<k; ++i){
+                p1[i]='h';
+            }
+        }
+        my_print();
+        my_del(p1);
+
+        //第二次申请，显示
+        cin >> k;
+        char* p2 = my_new(k);
+        if(p2 != NULL){
+            for(int i=0; i<k; ++i){
+                p2[i]='h';
+            }
+        }
         my_print();
     }
     return 0;
 }
 
-//初始化
+//---------------------初始化
 int my_init(){
     if(mbl!=NULL){
         my_deinit();
@@ -49,7 +72,7 @@ int my_init(){
     return 0;
 }
 
-//检查初始化之前是否有分块
+//-------------------检查初始化之前是否有分块
 int my_deinit(){
     if(mbl == NULL){
         return 0;
@@ -67,7 +90,7 @@ int my_deinit(){
     return 0;
 }
 
-//申请空间
+//--------------------------申请空间
 char* my_new(size_t _n){
     char* ret = NULL;
 
@@ -100,7 +123,8 @@ char* my_new(size_t _n){
 
         //指定分完块后的mbl
         mbl = p;
-        ret = BUFF + newmbl->offset; //有何用？
+        //返回值设为offset在BUFF上的指针
+        ret = BUFF + newmbl->offset;
     }
     else if(p->size == _n){
         p->isused = true;
@@ -108,6 +132,43 @@ char* my_new(size_t _n){
         mbl = p;
         ret = BUFF + p->offset;
     }
+    return ret;
+}
+
+//------------------------释放空间
+int my_del(char* _p){
+    if(_p == NULL)return -1;
+    int ret = -1;
+    mblnode* p = NULL;
+    mblnode* pcur = NULL;
+
+    p=mbl;
+    do{
+        if((p->offset + BUFF) == _p){
+            pcur = p;
+            break;
+        }
+        p=p->right;
+    }while(p != mbl);
+
+    if(NULL == pcur)return -1;
+
+    //========右空合并测试
+    pcur->left->right = pcur->right;
+    pcur->right->left = pcur->left;
+    pcur->right->offset -= pcur->size;
+    pcur->right->size +=pcur->size;
+
+    if(pcur->left->isused && pcur->right->isused){
+        //merge??
+    }else if(0){
+        //merge??
+    }else if(0){
+
+    }else if(0){
+
+    }
+
     return ret;
 }
 
@@ -122,6 +183,9 @@ int my_print(){
         cout << "--------------------" << endl;
         p=p->right;
     }while(mbl != p);
+    for(int i=0;i<strlen(BUFF); ++i){
+        cout << BUFF[i];
+    }
     cout << endl;
     return 0;
 }
