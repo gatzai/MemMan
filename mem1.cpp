@@ -20,11 +20,15 @@ struct mblnode{
 mblnode* mbl = NULL;
 char BUFF[MAXBUFFER];
 
-int my_init();
-int my_deinit();
-char* my_new(size_t _n);
-int my_del(char* _p);
-int my_print();
+int     my_init();
+int     my_deinit();
+char*   my_new(size_t _n);
+int     my_del(char* _p);
+void    my_merge_nil(mblnode* _p);      //左右都满
+void    my_merge_right(mblnode* _p);
+void    my_merge_left(mblnode* _p);
+void    my_merge_both(mblnode* _p);
+int     my_print();
 
 
 int main(){
@@ -159,18 +163,57 @@ int my_del(char* _p){
     pcur->right->offset -= pcur->size;
     pcur->right->size +=pcur->size;
 
+    //合并策略，还要看左右offset为0的情况
     if(pcur->left->isused && pcur->right->isused){
-        //merge??
-    }else if(0){
-        //merge??
-    }else if(0){
-
-    }else if(0){
-
+        //左右都满
+        my_merge_nil(pcur);
+        ret = 0;
+    }else if(!pcur->left->isused && pcur->right->isused){
+        //左空，右满
+        if(pcur->offset != 0)
+            my_merge_left(pcur);
+        else 
+            my_merge_nil(pcur);
+        ret = 0; 
+    }else if(pcur->left->isused && !pcur->right->isused){
+        //左满，右空
+        if(pcur->right->offset != 0)
+            my_merge_right(pcur);
+        else
+            my_merge_nil(pcur);
+        ret = 0;
+    }else if(!pcur->left->isused && !pcur->right->isused){
+        //左右都空 
+        if(pcur->right->offset == 0)
+            my_merge_left(pcur);
+        else if(pcur->offset == 0)
+            my_merge_right(pcur);
+        else 
+            my_merge_both(pcur);
+        ret = 0;
     }
 
     return ret;
 }
+
+void my_merge_nil(mblnode* _p){
+    _p->isused = false;
+    if(_p->size > mbl->size)
+        mbl = _p;
+}
+
+void my_merge_left(mblnode* _p){
+
+}
+
+void my_merge_right(mblnode* _p){
+
+}
+
+void my_merge_both(mblnode* _p){
+
+}
+
 
 int my_print(){
     if(NULL == mbl)return -1;
