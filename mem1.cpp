@@ -49,7 +49,7 @@ int main(){
         my_print();
         my_del(p1);
 
-        //第二次申请，显示
+        //第二次申请，显示，不释放
         cin >> k;
         char* p2 = my_new(k);
         if(p2 != NULL){
@@ -157,12 +157,6 @@ int my_del(char* _p){
 
     if(NULL == pcur)return -1;
 
-    //========右空合并测试
-    pcur->left->right = pcur->right;
-    pcur->right->left = pcur->left;
-    pcur->right->offset -= pcur->size;
-    pcur->right->size +=pcur->size;
-
     //合并策略，还要看左右offset为0的情况
     if(pcur->left->isused && pcur->right->isused){
         //左右都满
@@ -203,15 +197,42 @@ void my_merge_nil(mblnode* _p){
 }
 
 void my_merge_left(mblnode* _p){
+    _p->left->right = _p->right;
+    _p->right->left = _p->left;
+    _p->left->size += _p->size;
+    
+    if(mbl->size < _p->left->size)      //这一步的意义？
+        mbl = _p->left;
 
+    delete _p;
+    _p = NULL;
 }
 
 void my_merge_right(mblnode* _p){
+    _p->left->right = _p->right;
+    _p->right->left = _p->left;
+    _p->right->offset = _p->offset;
+    _p->right->size += _p->size;
+    
+    if(mbl->size < _p->right->size)
+        mbl = _p->right;
 
+    delete _p;
+    _p = NULL;
 }
 
 void my_merge_both(mblnode* _p){
+    _p->left->right = _p->right->right;
+    _p->right->right->left = _p->left;
+    _p->left->size += _p->size +_p->right->size;
+    
+    if(mbl->size < _p->left->size)
+        mbl = _p->left;
 
+    delete _p;
+    delete _p->right;
+    _p->right = NULL;
+    _p = NULL;
 }
 
 
